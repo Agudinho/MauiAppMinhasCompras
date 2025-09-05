@@ -1,6 +1,5 @@
 using MauiAppMinhasCompras.Models;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace MauiAppMinhasCompras.Views;
 
@@ -47,6 +46,8 @@ public partial class ListaProduto : ContentPage
 		{
 			string q = e.NewTextValue;
 
+			lst_produtos.IsRefreshing = true;
+
 			lista.Clear();
 
 			List<Produto> tmp = await App.Db.Search(q);
@@ -56,7 +57,11 @@ public partial class ListaProduto : ContentPage
          catch (Exception ex)
         {
            await DisplayAlert("Ops", ex.Message, "OK");
-        }
+		}
+        finally
+		{
+            lst_produtos.IsRefreshing = false;
+		}
     }
 
     private void ToolbarItem_Clicked_1(object sender, EventArgs e)
@@ -67,7 +72,7 @@ public partial class ListaProduto : ContentPage
 		DisplayAlert("Total dos produtos", msg, "OK");
     }
 
-    private async Task MenuItem_Clicked(object sender, EventArgs e)
+    private async void MenuItem_Clicked(object sender, EventArgs e)
     {
 		try
 		{
@@ -104,5 +109,31 @@ public partial class ListaProduto : ContentPage
 		{
 			DisplayAlert("Ops", ex.Message, "OK");
 		}
+    }
+
+    private async void lst_produtos_Refreshing(object sender, EventArgs e)
+    {
+		try
+		{
+
+			lista.Clear();
+
+			List<Produto> tmp = await App.Db.GetAll();
+
+			tmp.ForEach(i => lista.Add(i));
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Ops", ex.Message, "OK");
+		}
+		finally 
+		{
+			lst_produtos.IsRefreshing = false;
+		}
+    }
+
+    private async void ToolbarItem_Clicked_2(object sender, EventArgs e)
+    {
+		await Navigation.PushAsync(new NewPage1());
     }
 }
